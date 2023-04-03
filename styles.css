@@ -1,0 +1,33 @@
+
+*{
+    box-sizing: content-box;
+}
+
+
+.brand{
+    text-align: center;
+}
+header{
+    border-bottom: solid black 2px;
+}
+
+.spiral{
+    margin-top: 20px;
+    text-align: center;
+    font-size: 30px;
+}
+
+.scoreboard{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    margin-top: 1%;
+    margin-left: 42%;
+    margin-right: 50%;
+}
+
+.scoreboard-letter{
+    border:solid grey 3px;
+    margin: 8px;
+    width: 40px;
+    height: 40px;
+}

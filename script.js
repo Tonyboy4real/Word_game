@@ -1,5 +1,7 @@
 const letters = document.querySelectorAll(".scoreboard-letter")
 
+const loadingDiv = document.querySelector(".info-bar");
+
 const ANSWER_LENGTH =5;
 
 const ROUNDS=6;
@@ -14,53 +16,63 @@ let i = 0;
 
 
 
+
 const GET_WORD_URL = "https://words.dev-apis.com/word-of-the-day";
 
 const POST_WORD_URL = "https://words.dev-apis.com/validate-word";
 
-let x;
-let aWord;
-
-
-async function getWord() {
-
-    
-  const promise = await fetch(GET_WORD_URL);
-  const processedResponse = await promise.json();
-  const word = await processedResponse.word
- 
-
-  
-  return word
-}
-
-x= getWord()
-
-
-x.then((value) => {
- 
-    aWord = value// "Success"
-
-    console.log(aWord)
-  })    
-
-
-console.log(aWord )
 
 
 
 
 function addLetter(letter){
-    currentGuess+=letter.toLowerCase()
-    letters[currentRow*5 + i].innerText = letter;
+
+    if(currentGuess.length< ANSWER_LENGTH){
+        currentGuess+=letter.toLowerCase()
+        
+
+
+    }else{
+        
+        currentGuess = currentGuess.substring(0,currentGuess.length -1) + letter.toLowerCase()
+        
+    }
+    letters[ANSWER_LENGTH*currentRow + currentGuess.length-1].innerText=letter;
+
+    
+    
 }
+
+function setLoading(isLoading){
+    loadingDiv.classList.toggle('hidden',!isLoading)
+}
+
+async function commit(){
+    if(currentGuess.length !== ANSWER_LENGTH){
+        return
+    }
+    const gueessParts = currentGuess.sp
+    for (let i = 0; i < array.length; i++) {
+        const element = array[i];
+        
+    }
+    currentRow++;
+    currentGuess=''
+}
+
 
 function removeLetter(){
 
-    currentGuess=currentGuess.slice(0,currentGuess.length - 1);
-    letters[currentRow*5 + i].innerText = "";
+    currentGuess = currentGuess.substring(0,currentGuess.length -1)
+    letters[ANSWER_LENGTH*currentRow + currentGuess.length].innerText = "";
 
 }
+
+function isLetter(letter) {
+    return /^[a-zA-Z]$/.test(letter);
+  }
+
+
 
 function isIValid(i){
     if(i>=0 &&  i <=4){
@@ -70,65 +82,13 @@ function isIValid(i){
         return false
     }
 }
-  
 
-function isLetter(letter) {
-    return /^[a-zA-Z]$/.test(letter);
-  }
 
- 
+
+
+
+async function checkWordValidity(){
    
-
-
-  document.addEventListener("keydown",async function (event){
-
-    let key = event.key.toUpperCase();
-
-    if(isLetter(key) && isIValid(i) ){
-        addLetter(key)
-        i++
-    }
-    else if(key==='BACKSPACE' && i !== 0){
-        i--;
-        removeLetter()
-        
-    }
-    else if(key==='ENTER' && i===5){
-
-        if( await checkWordValidity()){
-            if( currentGuess === aWord ){
-                checkLetters()
-                alert("You won!")
-                
-            }
-            else{
-    
-    
-                checkWordValidity().then(data => {
-                    console.log(data);
-                });
-
-                checkLetters();
-                currentGuess="";
-                currentRow++;
-                i=0;
-
-
-            }
-
-        }
-
-        else{
-            alert("invalid word ")
-        }
-        
-    }
-    
-  })
-
-
-
-  async function checkWordValidity(){
 
     let data = {'word': currentGuess}
 
@@ -153,7 +113,7 @@ function isLetter(letter) {
 
 
 
-function checkLetters(){
+function checkLetters(aWord){
 
     for (let i = 0; i < 5; i++) {
     
@@ -174,6 +134,87 @@ function checkLetters(){
     }
 
 }
+  
+
+
+
+async function init(){
+
+    const promise = await fetch(GET_WORD_URL);
+    const processedResponse = await promise.json();
+    const aWord = await processedResponse.word;
+    setLoading(false)
+
+    document.addEventListener("keydown",async function (event){
+
+        let key = event.key.toUpperCase();
+    
+        if(isLetter(key) ){
+            addLetter(key)
+            i++
+        }
+        else if(key==='BACKSPACE' && i !== 0){
+            i--;
+            removeLetter()
+            
+        }
+        else if(key==='ENTER' && i===ANSWER_LENGTH){
+
+            commit();
+    
+            if( await checkWordValidity()){
+                if( currentGuess === aWord ){
+                    checkLetters(aWord)
+                    alert("You won!")
+                    
+                }
+                else{
+                    checkLetters(aWord);
+                    
+
+                }
+    
+            }
+    
+            else{
+                alert("invalid word ")
+            }
+            
+        }
+        
+      })
+
+}
+
+init();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+   
+
+
+  
+
+
+
+  
+
+
   
     
    

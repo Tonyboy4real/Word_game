@@ -81,9 +81,10 @@ function isLetter(letter) {
 
 
   document.addEventListener("keydown",async function (event){
+
     let key = event.key.toUpperCase();
+
     if(isLetter(key) && isIValid(i) ){
-        console.log(i)
         addLetter(key)
         i++
     }
@@ -96,6 +97,7 @@ function isLetter(letter) {
 
         if( await checkWordValidity()){
             if( currentGuess === aWord ){
+                checkLetters()
                 alert("You won!")
                 
             }
@@ -122,10 +124,12 @@ function isLetter(letter) {
         
     }
     
-
   })
 
+
+
   async function checkWordValidity(){
+
     let data = {'word': currentGuess}
 
 
@@ -138,14 +142,10 @@ function isLetter(letter) {
     });
 
     if (res.ok) {
-
-
         let ret = await res.json();
         console.log(ret.validWord )
 
         return ret.validWord
-       
-
     } else {
         return `HTTP error: ${res.status}`;
     }
@@ -160,7 +160,6 @@ function checkLetters(){
         if (!aWord.includes(currentGuess[i])){
 
             letters[currentRow*5 + i].style.backgroundColor = '#888';
-            
         }
         else if ( aWord[i] === currentGuess[i]){
 
@@ -172,10 +171,7 @@ function checkLetters(){
             letters[currentRow*5 + i].style.backgroundColor = 'goldenrod';
         }
              
-        
-
     }
-
 
 }
   

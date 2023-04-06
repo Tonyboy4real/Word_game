@@ -26,6 +26,8 @@ const POST_WORD_URL = "https://words.dev-apis.com/validate-word";
 
 
 function addLetter(letter){
+    console.log(currentGuess)
+           
 
     if(currentGuess.length< ANSWER_LENGTH){
         currentGuess+=letter.toLowerCase()
@@ -47,18 +49,7 @@ function setLoading(isLoading){
     loadingDiv.classList.toggle('hidden',!isLoading)
 }
 
-async function commit(){
-    if(currentGuess.length !== ANSWER_LENGTH){
-        return
-    }
-    const gueessParts = currentGuess.sp
-    for (let i = 0; i < array.length; i++) {
-        const element = array[i];
-        
-    }
-    currentRow++;
-    currentGuess=''
-}
+
 
 
 function removeLetter(){
@@ -143,7 +134,9 @@ async function init(){
     const promise = await fetch(GET_WORD_URL);
     const processedResponse = await promise.json();
     const aWord = await processedResponse.word;
+    const wordParts = aWord.split("");
     setLoading(false)
+    
 
     document.addEventListener("keydown",async function (event){
 
@@ -158,18 +151,18 @@ async function init(){
             removeLetter()
             
         }
-        else if(key==='ENTER' && i===ANSWER_LENGTH){
+        else if(key==='ENTER'){
 
             commit();
     
             if( await checkWordValidity()){
                 if( currentGuess === aWord ){
-                    checkLetters(aWord)
+                    
                     alert("You won!")
                     
                 }
                 else{
-                    checkLetters(aWord);
+                    
                     
 
                 }
@@ -184,43 +177,70 @@ async function init(){
         
       })
 
+      async function commit(){
+        if(currentGuess.length !== ANSWER_LENGTH){
+            return
+        }
+        const gueessParts = currentGuess.split("");
+        console.log(gueessParts)
+
+        let map = makeMap(wordParts)
+
+        console.log(map)
+        
+        for (let i = 0; i < ANSWER_LENGTH; i++) {
+            // if element correct
+            if(gueessParts[i]===wordParts[i]){
+                letters[currentRow*ANSWER_LENGTH+i].classList.add('correct');
+                map[gueessParts[i]]--;
+            }
+            
+        
+        }
+        
+           
+            
+        for (let i = 0; i < ANSWER_LENGTH; i++) {
+            if(gueessParts[i]===wordParts[i]){
+                
+            }else if (wordParts.includes(gueessParts[i]) && map[gueessParts[i]] >0)
+                {
+                    letters[currentRow*ANSWER_LENGTH+i].classList.add('close');
+                    map[gueessParts[i]]--;
+                } else{
+                    letters[currentRow*ANSWER_LENGTH+i].classList.add('wrong');
+                }
+                
+            
+        }
+        console.log(map)
+        currentRow++;
+        currentGuess=''
+
+        }
+
+
+    
+
+}
+
+
+function makeMap(array){
+    let obj={};
+    for (let i = 0; i < array.length; i++) {
+        let letter = array[i]
+       if(obj[letter]){
+        obj[letter]++
+       }else{
+        obj[letter]=1;
+       }
+       console.log(obj[letter])
+        
+    }
+    return obj
 }
 
 init();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
-   
-
-
-  
-
-
-
-  
-
-
-  
-    
-   
-
-
-
 
 
 

@@ -26,7 +26,6 @@ const POST_WORD_URL = "https://words.dev-apis.com/validate-word";
 
 
 function addLetter(letter){
-    console.log(currentGuess)
            
 
     if(currentGuess.length< ANSWER_LENGTH){
@@ -78,29 +77,6 @@ function isIValid(i){
 
 
 
-async function checkWordValidity(){
-   
-
-    let data = {'word': currentGuess}
-
-
-    let res = await fetch(POST_WORD_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-    });
-
-    if (res.ok) {
-        let ret = await res.json();
-        console.log(ret.validWord )
-
-        return ret.validWord
-    } else {
-        return `HTTP error: ${res.status}`;
-    }
-}
 
 
 
@@ -130,15 +106,23 @@ function checkLetters(aWord){
 
 
 async function init(){
+    isLoading=true;
 
     const promise = await fetch(GET_WORD_URL);
     const processedResponse = await promise.json();
     const aWord = await processedResponse.word;
     const wordParts = aWord.split("");
+    let done = false;
     setLoading(false)
+    isLoading=false;
     
 
     document.addEventListener("keydown",async function (event){
+
+        if(done || isLoading){
+            //do nothing
+            return;
+        }
 
         let key = event.key.toUpperCase();
     
@@ -155,23 +139,7 @@ async function init(){
 
             commit();
     
-            if( await checkWordValidity()){
-                if( currentGuess === aWord ){
-                    
-                    alert("You won!")
-                    
-                }
-                else{
-                    
-                    
-
-                }
-    
-            }
-    
-            else{
-                alert("invalid word ")
-            }
+        
             
         }
         
@@ -181,6 +149,24 @@ async function init(){
         if(currentGuess.length !== ANSWER_LENGTH){
             return
         }
+        isLoading=true;
+        setLoading(true)
+        const res = await fetch(POST_WORD_URL,{
+            method:"POST",
+            body:JSON.stringify({word:currentGuess})
+        });
+        const resObj = await res.json();
+        const validWord= resObj.validWord
+
+        isLoading= false
+
+        setLoading(false)
+
+        if(!validWord){
+            markInvalidWord();
+            return
+        }
+       
         const gueessParts = currentGuess.split("");
         console.log(gueessParts)
 
@@ -213,10 +199,26 @@ async function init(){
                 
             
         }
-        console.log(map)
-        currentRow++;
-        currentGuess=''
 
+
+        
+        currentRow++;
+        
+
+
+        if(currentGuess===aWord){
+            alert("Yoy won!")
+            document.querySelector(".brand").classList.add("winner")
+            done =true;
+            return
+        } else if( currentRow === ROUNDS ){
+            alert(`You lost the word was ${aWord}`);
+            done = true;
+            return;
+
+            }
+        
+            currentGuess=''
         }
 
 
@@ -243,4 +245,16 @@ function makeMap(array){
 init();
 
 
+function markInvalidWord(){
+    for (let i = 0; i < ANSWER_LENGTH; i++) {
+        letters[currentRow*ANSWER_LENGTH+i].classList.add('invalid');
 
+
+        setTimeout(function(){
+            letters[currentRow*ANSWER_LENGTH+i].classList.remove('invalid');
+        }, 500)
+    }
+
+    
+    return;
+}
